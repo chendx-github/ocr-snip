@@ -73,7 +73,7 @@ Installed-Size: $SIZE
 Maintainer: chendx <chendx@localhost>
 Depends: libc6, libgl1, libegl1, libglvnd0, libglx0, libxcb1
 Recommends: libxcb-cursor0, xclip, xdotool
-Homepage: https://github.com/chendx/ocr-snip
+Homepage: https://github.com/chendx-github/ocr-snip
 Description: Hotkey screenshot OCR to clipboard
  Press Ctrl+Alt+Q, drag a box, the text inside goes straight to the clipboard.
  Self-contained (Python + Qt bundled), no system GTK/PyGObject required.

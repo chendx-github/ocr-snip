@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)](#安装linux)
-[![build-windows](https://github.com/chendx/ocr-snip/actions/workflows/build-windows.yml/badge.svg)](https://github.com/chendx/ocr-snip/actions/workflows/build-windows.yml)
+[![build-windows](https://github.com/chendx-github/ocr-snip/actions/workflows/build-windows.yml/badge.svg)](https://github.com/chendx-github/ocr-snip/actions/workflows/build-windows.yml)
 
 按下热键 → 框选一块屏幕 → 选区里的文字直接进剪贴板。**为延迟而做，不为功能而做。**
 
@@ -24,7 +24,7 @@ windows\build.bat         :: 打包出绿色版 + ocrsnip-setup.exe（需 Inno S
 ## 安装（Linux）
 
 ```bash
-git clone https://github.com/chendx/ocr-snip.git && cd ocr-snip
+git clone https://github.com/chendx-github/ocr-snip.git && cd ocr-snip
 ./scripts/install.sh            # venv + 依赖 + systemd 用户服务，并立即启动
 ./scripts/install.sh --cinnamon-shortcut   # 另在 Cinnamon 绑 Super+Shift+S -> ocrsnip capture
 ```

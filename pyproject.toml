@@ -10,6 +10,11 @@ dependencies = [
     "python-xlib>=0.33; sys_platform != 'win32'",
 ]
 
+[project.urls]
+Homepage = "https://github.com/chendx-github/ocr-snip"
+Repository = "https://github.com/chendx-github/ocr-snip"
+Issues = "https://github.com/chendx-github/ocr-snip/issues"
+
 [project.scripts]
 ocrsnip = "ocrsnip.cli:main"
 
