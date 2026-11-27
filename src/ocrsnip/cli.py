@@ -219,7 +219,9 @@ def _cmd_doctor(cfg: Config) -> int:
         if is_windows():  # Linux 上 Qt 只是可选后端，坏了不影响 GTK 后端
             ok &= qt_ok
     if not is_windows():
-        ok &= _doctor_linux(cfg)
+        # 打包版只带 Qt（PyGObject/GTK 没法随包走），这时 GTK 那条"抓屏"检查必然失败，
+        # 不该算进结论里——按实际选用的后端决定要不要查 GTK。
+        ok &= _doctor_linux(cfg, need_gtk=_pick_ui("auto") == "gtk")
 
     daemon_reply = _send("status", timeout=0.5)
     if daemon_reply:
@@ -274,7 +276,7 @@ def _doctor_qt(cfg: Config) -> bool:
         return False
 
 
-def _doctor_linux(cfg: Config) -> bool:
+def _doctor_linux(cfg: Config, need_gtk: bool = True) -> bool:
     ok = True
     from . import hotkey
 
@@ -284,17 +286,20 @@ def _doctor_linux(cfg: Config) -> bool:
         ok = False
         print("  ! 非 X11 会话：请改用桌面自定义快捷键调用 `ocrsnip capture`")
 
-    try:
-        from . import capture, gi_setup  # noqa: F401
-        from gi.repository import Gdk
+    if need_gtk:
+        try:
+            from . import capture, gi_setup  # noqa: F401
+            from gi.repository import Gdk
 
-        width, height = capture.screen_geometry()
-        print(f"虚拟屏         : {width}x{height}  显示器={Gdk.Display.get_default().get_n_monitors()}")
-        crop = capture.grab_region(0, 0, min(64, width), min(32, height)).bgr(0, 0, 64, 32)
-        print(f"裁剪校验       : {crop.shape} dtype={crop.dtype}")
-    except Exception as exc:
-        ok = False
-        print(f"抓屏           : 失败 {exc}")
+            width, height = capture.screen_geometry()
+            print(f"虚拟屏         : {width}x{height}  显示器={Gdk.Display.get_default().get_n_monitors()}")
+            crop = capture.grab_region(0, 0, min(64, width), min(32, height)).bgr(0, 0, 64, 32)
+            print(f"裁剪校验       : {crop.shape} dtype={crop.dtype}")
+        except Exception as exc:
+            ok = False
+            print(f"抓屏           : 失败 {exc}")
+    else:
+        print("GTK 后端       : 跳过（当前是 Qt 后端，抓屏在上面测过）")
 
     print(f"xclip          : {'可用' if _which('xclip') else '缺失（剪贴板将退回 GTK）'}")
     print(f"xdotool        : {'可用' if _which('xdotool') else '缺失（auto_paste 不可用）'}")
