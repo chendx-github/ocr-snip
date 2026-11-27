@@ -68,6 +68,10 @@ sudo apt install ./ocrsnip_0.3.0_amd64.deb
 按这个底线，能直接跑的系统：**Ubuntu 24.04+、Linux Mint 22+、Debian 13+、Fedora 39+、
 RHEL/Alma/Rocky 10+、Arch / openSUSE Tumbleweed（滚动版都行）**。
 
+> **老系统（glibc < 2.38，如 RHEL/Rocky/Alma 8、Debian 12、Mint 21）的构建支持在
+> [`legacy-glibc`](https://github.com/chendx-github/ocr-snip/tree/legacy-glibc) 分支单独维护**
+> （社区维护，不随主线发布）：那里面带了自动补 `libxcb-cursor` 的脚本与对应排查说明。
+>
 > 老一些的系统（Ubuntu 22.04 / Debian 12 / Mint 21）用当前包会报
 > `GLIBC_2.38 not found` —— 需要在老系统里重新构建：
 > `./linux/build_in_container.sh`（在 ubuntu:22.04 容器里构建，底线降到 2.35；
