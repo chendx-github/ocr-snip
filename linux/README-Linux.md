@@ -62,7 +62,7 @@ sudo apt install ./ocrsnip_0.3.0_amd64.deb
 | 架构 | x86_64 |
 | C 库 | **glibc ≥ 2.38**（实测：包里 `libpython3.12.so` 需要 2.38；本包在 Mint 22.3 / glibc 2.39 上构建） |
 | 显示服务 | **X11**（Xorg / XWayland 均可；纯 Wayland 下热键不生效） |
-| 系统库 | `libgl1 libegl1 libglvnd0 libglx0 libxcb1`（deb 会自动装） |
+| 系统库 | `libgl1 libegl1 libglvnd0 libglx0 libxcb1`，外加 **`libxcb-cursor.so.0`**（Qt 6.5+ 的 xcb 平台插件硬依赖：Debian 系叫 `libxcb-cursor0`，RHEL/Rocky 8 只能用 EPEL 的 `xcb-util-cursor`。构建时会自动取一份打进 `_internal/`，见第五节） |
 | 可选 | `xclip`（剪贴板兜底）、`xdotool`（`auto_paste = true` 时用） |
 
 按这个底线，能直接跑的系统：**Ubuntu 24.04+、Linux Mint 22+、Debian 13+、Fedora 39+、
@@ -72,6 +72,11 @@ RHEL/Alma/Rocky 10+、Arch / openSUSE Tumbleweed（滚动版都行）**。
 > `GLIBC_2.38 not found` —— 需要在老系统里重新构建：
 > `./linux/build_in_container.sh`（在 ubuntu:22.04 容器里构建，底线降到 2.35；
 > 本机因公司代理拦了容器仓库，这个脚本没法在这儿代跑）。
+>
+> 连容器都没有的老系统（例如 Rocky/RHEL 8，glibc 2.28）直接用源码构建就行：
+> `./linux/build_app.sh` 出来的产物按本机 glibc 链接，不再有 2.38 的坎。
+> 实测 Rocky 8.10 / glibc 2.28 / X11：构建通过，抓屏 8 ms、OCR 25–79 ms、
+> 热键→框选→剪贴板端到端跑通；同一台机器上官方 AppImage 因为 2.38 底线直接起不来。
 
 ---
 
@@ -98,6 +103,8 @@ RHEL/Alma/Rocky 10+、Arch / openSUSE Tumbleweed（滚动版都行）**。
 | 按热键没反应 | 会话被锁屏、或有程序（截图/剪贴板工具）持有键盘 grab；解锁或退出那个程序即可。`ocrsnip doctor` 会报热键状态 |
 | 面板里是黑图 | 用了 Wayland 会话（需要在 XWayland 下运行，或登录时选 Xorg） |
 | 提示 `libGL.so.1: cannot open` | 装 `libgl1 libegl1` |
+| 启动报 `libpython3.12.so.1.0: version 'GLIBC_2.38' not found`（AppImage / 预编译包） | 预编译包是在 glibc 2.39 机器上构建的，底线 2.38；glibc < 2.38 的系统（Ubuntu 22.04 / Debian 12 / Rocky 8 …）只能本地构建，见第五节 |
+| `Could not load the Qt platform plugin "xcb"`，或日志里出现 `From 6.5.0, xcb-cursor0 or libxcb-cursor0 is needed` | 缺 `libxcb-cursor.so.0`。`./linux/build_app.sh` 会自动取一份打进产物；手工装：Debian 系 `sudo apt install libxcb-cursor0`，RHEL/Rocky 8 用 `sudo dnf install --enablerepo=epel xcb-util-cursor` |
 | 想开机自启但没生效 | `systemctl --user enable ocrsnip` 后再 `systemctl --user start ocrsnip` |
 
 ---
@@ -111,6 +118,11 @@ RHEL/Alma/Rocky 10+、Arch / openSUSE Tumbleweed（滚动版都行）**。
 ./linux/build_appimage.sh  # → releases/ocrsnip-<ver>-x86_64.AppImage（首次会下载 appimagetool）
 ./linux/build_in_container.sh   # 想在老系统上跑：在 ubuntu:22.04 容器里构建
 ```
+
+构建会先跑 `./linux/fetch_vendor_libs.sh`：系统里没有 `libxcb-cursor.so.0` 时，
+它从发行版仓库把包下下来、只取出那个 `.so` 放进 `linux/vendor/lib/`（不需要 root，
+也就不用为了一个库去动系统），随后由 `linux/ocrsnip.spec` 打进产物的 `_internal/`。
+取不到只警告、不阻断构建——目标机器自带该库就没问题。也可以单独跑它。
 
 产物体积参考（0.3.0）：tar.gz 198 MB / deb 156 MB / AppImage 184 MB
 （其中 OpenCV 172 MB、onnxruntime 69 MB、PySide6 100 MB、OCR 模型 31 MB）。
