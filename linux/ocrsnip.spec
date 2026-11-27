@@ -22,6 +22,17 @@ datas = collect_data_files("rapidocr", include_py_files=False)
 datas += collect_data_files("onnxruntime", include_py_files=False)
 datas += [(ICON, "icon")]
 
+# Qt 6.5 起，xcb 平台插件会 dlopen libxcb-cursor.so.0；有些发行版（RHEL/Rocky/Alma 8）
+# 官方仓库里根本没有这个包（只有 EPEL 有 xcb-util-cursor），装出来的产物一跑就
+# "Could not load the Qt platform plugin xcb"。
+# linux/fetch_vendor_libs.sh 会把它取到 linux/vendor/lib/，这里顺手打进去：
+# 落到 _internal/，bootloader 设的 RUNPATH 就能直接找到，用户不用配 LD_LIBRARY_PATH。
+# 没有这份文件也不影响构建（其它平台/发行版通常自带该库）。
+binaries = []
+_vendor_xcb_cursor = ROOT / "linux" / "vendor" / "lib" / "libxcb-cursor.so.0"
+if _vendor_xcb_cursor.exists():
+    binaries.append((str(_vendor_xcb_cursor), "."))
+
 hiddenimports = [
     "onnxruntime",
     "onnxruntime.capi._pybind_state",
@@ -92,7 +103,7 @@ excludes = [
 a = Analysis(
     [str(ROOT / "linux" / "entry.py")],
     pathex=[str(ROOT / "src")],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],

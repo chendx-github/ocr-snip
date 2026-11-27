@@ -17,3 +17,5 @@ releases/
 linux/dist/
 linux/build/
 linux/.cache/
+# 构建时从发行版包里提取的第三方 .so（二进制不入库，见 linux/fetch_vendor_libs.sh）
+linux/vendor/
