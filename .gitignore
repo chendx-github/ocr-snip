@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Windows 打包产物（只提交 windows/ 下的脚本与 spec）
+build/
+dist/
+windows/build/
+windows/dist/
+windows/Output/
+windows/*.exe
+releases/
+
+# Linux 打包产物与缓存（只提交 linux/ 下的脚本与 spec）
+linux/dist/
+linux/build/
+linux/.cache/

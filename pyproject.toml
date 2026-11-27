@@ -1,0 +1,32 @@
+[project]
+name = "ocrsnip"
+version = "0.3.0"
+description = "Hotkey screenshot OCR: select a region, get its text on the clipboard. Built for latency, not features."
+requires-python = ">=3.10"
+dependencies = [
+    "rapidocr>=3.10.0",
+    "onnxruntime>=1.17",
+    "numpy>=1.24",
+    "python-xlib>=0.33; sys_platform != 'win32'",
+]
+
+[project.scripts]
+ocrsnip = "ocrsnip.cli:main"
+
+# Windows 上 gui-scripts 生成的是无控制台的 exe（托盘程序用它启动）
+[project.gui-scripts]
+ocrsnipw = "ocrsnip.cli:main"
+
+[project.optional-dependencies]
+# Windows / 跨平台界面后端
+gui = ["PySide6-Essentials>=6.5"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ocrsnip"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

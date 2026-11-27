@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=ocrsnip
+Name[zh_CN]=ocrsnip 截屏识别
+Comment=Hotkey -> select region -> OCR -> clipboard
+Comment[zh_CN]=按 Ctrl+Alt+Q 框选屏幕，文字直接进剪贴板
+Exec=@EXEC@ daemon --ui qt
+Icon=@ICON@
+Terminal=false
+Categories=Utility;
+X-GNOME-Autostart-enabled=true
+StartupNotify=false

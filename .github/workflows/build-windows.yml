@@ -1,0 +1,59 @@
+name: build-windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+    branches: [main, master]
+    paths:
+      - "src/**"
+      - "windows/**"
+      - "pyproject.toml"
+      - ".github/workflows/build-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install -e ".[gui]" pyinstaller pytest
+
+      - name: 单元测试
+        run: python -m pytest -q
+
+      - name: 自检（OCR 能否出字）
+        run: python -m ocrsnip selftest --ui qt
+
+      - name: PyInstaller 打包
+        run: pyinstaller windows/ocrsnip.spec --noconfirm --clean --distpath windows/dist --workpath windows/build
+
+      - name: 冒烟测试（打包后的 exe 能自检通过）
+        run: |
+          windows\dist\ocrsnip\ocrsnip.exe --selftest --ui qt
+        shell: cmd
+
+      - name: 安装 Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: 生成安装包
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows\installer.iss
+        shell: pwsh
+        working-directory: .
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocrsnip-windows
+          path: |
+            windows/Output/*.exe
+            windows/dist/ocrsnip/**
+          retention-days: 30
